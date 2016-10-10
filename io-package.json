@@ -1,0 +1,38 @@
+{
+  "common": {
+    "name": "find-my-iphone",
+    "version": "0.0.1",
+    "title": "Find my iPhone",
+    "desc": {
+      "en": "Find my Apple device (iPhone, iPad, iMac...)",
+      "de": "Find my Apple device (iPhone, iPad, iMac...)",
+      "ru": "Find my Apple device (iPhone, iPad, iMac...)"
+    },
+    "keywords": [
+      "ioBroker",
+      "Apple",
+      "iPhone",
+      "iPad",
+      "macBook",
+      "MacMini",
+      "iMac"
+    ],
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "icon": "find-my-iphone.png",
+    "extIcon": "https://raw.githubusercontent.com/soef/iobroker.find-my-iphone/master/admin/find-my-iphone.png",
+    "readme": "https://github.com/soef/iobroker.find-my-iphone/blob/master/README.md",
+    "loglevel": "info",
+    "type": "hardware",
+    "messagebox": true,
+    "enabled": true
+  },
+  "native": {
+    "username": "",
+    "password": ""
+  },
+  "instanceObjects": [
+  ],
+  "objects": [
+  ]
+}
