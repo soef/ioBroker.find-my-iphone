@@ -7,7 +7,10 @@ var soef = require('soef');
 var debug = false;
 var iCloud = require("find-my-iphone").findmyphone;
 
-iCloud.alertDevice = function(deviceId, message, callback) {
+//inactiveTime:
+//nextPollTime:
+
+iCloud.playSound = function(deviceId, message, callback) {
     var options = {
         url: this.base_path + "/fmipservice/client/web/playSound",
         json: {
@@ -15,6 +18,108 @@ iCloud.alertDevice = function(deviceId, message, callback) {
             "device": deviceId
         }
     };
+    this.iRequest.post(options, callback);
+};
+
+iCloud.sendMessage = function(deviceId, message, sound, callback) {
+    if (typeof sound == 'function') {
+        callback = sound;
+        sound = true;
+    }
+    var options = {
+        url: this.base_path + "/fmipservice/client/web/sendMessage",
+        json: {
+            "device": deviceId,
+            "sound": !!sound,
+            "subject": 'ioBroker',
+            "userText": true,
+            "text": message
+        }
+    };
+    this.iRequest.post(options, callback);
+};
+
+iCloud.alertDevice = function(deviceId, message, callback) {
+    //this.sendMessage(deviceId, message, true, callback);
+    this.playSound(deviceId, message, callback);
+};
+
+iCloud.refresh = function(deviceId, callback) {
+    if (typeof deviceId == 'function') {
+        callback = deviceId;
+        deviceId = 'all';
+    }
+    var options = {
+        url: this.base_path + "/fmipservice/client/web/refreshClient",
+        json: {
+            "clientContext": {
+
+                "appName": "iCloud Find (Web)",
+                "appVersion": "2.0",
+                "timezone": "Europe/Berlin", //"US/Eastern",
+                "inactiveTime": 3571,
+                "apiVersion": "3.0",
+
+                "fmly": true,
+                "shouldLocate": true,
+                "selectedDevice": deviceId
+            }
+        }
+    };
+    this.iRequest.post(options, function(err,res) {
+        if (err || !res || !res.body || !res.body.content) {
+            return callback(err);
+        }
+        callback(0, res.body.content);
+    });
+};
+
+iCloud.get = function (callback) {
+    this.init(function(err, res, body) {
+        if (err || !res || res.statusCode != 200 || !body || !body.content) {
+            return callback (err);
+        }
+        callback(0, body.content);
+    });
+};
+
+iCloud.logout = function () {
+    delete this.jar;
+};
+
+iCloud.lostDevice = function(deviceId, ownerNbr, text, emailUpdates, callback) {
+    if (typeof emailUpdates == 'function') {
+        callback = emailUpdates;
+        emailUpdates = false;
+    }
+    if (typeof text == 'function') {
+        callback = text;
+        text = null;
+    }
+    if (typeof ownerNbr == 'function') {
+        callback = ownerNbr;
+        ownerNbr = null;
+    }
+    var options = {
+        method: "POST",
+        url: this.base_path + "/fmipservice/client/web/lostDevice",
+        json: {
+            "emailUpdates": emailUpdates || false,
+            "lostModeEnabled": true,
+            "trackingEnabled": true,
+            "device": deviceId,
+            //"passcode": "",
+            "userText": false
+        }
+    };
+
+    if (ownerNbr) {
+        options.json.ownerNbr = ownerNbr;
+    }
+    if (text) {
+        options.json.userText = true;
+        options.json.text = text;
+    }
     this.iRequest.post(options, callback);
 };
 
@@ -43,10 +148,9 @@ function onStateChange(id, state) {
     var ar = id.split('.');
     //var dcs = adapter.idToDCS(id);
     var deviceName = ar[2], stateName = ar[3];
-    if (stateName == undefined) stateName = deviceName;
     devices.invalidate(id);
     var device = devices.get(deviceName);
-    switch (stateName) {
+    switch (stateName || 'root') {
         case 'alert':
             if (device && device.native && device.native.id) {
                 var msg = typeof state.val == 'strimg' && state.val != "" ? state.val : 'ioBroker Find my iPhone Alert';
@@ -55,39 +159,50 @@ function onStateChange(id, state) {
             }
             break;
         case 'refresh':
-            updateDevices();
+            devices.root.setex(id, false);
+            if (device && device.native && device.native.id) {
+                updateDevice(device.native.id);
+            }
             break;
+        case 'root':
+            switch(deviceName) {
+                case 'refresh':
+                    //devices.root.set('refresh', false);
+                    devices.root.setex(id, false);
+                    updateDevice();
+                    break;
+            }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function createDevices (cb) {
+function setOurStates(appleDevices, cb) {
+    var i = 0;
 
-    var dev = new devices.CDevice(0, '');
-    dev.set('refresh', false);
-    iCloud.getDevices(function (err, appleDevices) {
-        if (err || !appleDevices) return;
-        var i = 0;
-        function doIt() {
-            if (i >= appleDevices.length) {
-                devices.update();
-                if (cb) cb();
-                return;
-            }
-            var device = appleDevices[i++];
-            var dev = new devices.CDevice(0, '');
-            dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: {id: device.id}});
-            //dev.createNew('batteryLevel', )
-            dev.set('batteryLevel', device.batteryLevel >> 0 * 100);
-            dev.set('lostModeCapable', device.lostModeCapable);
-            dev.set('alert', 'ioBroker Find my iPhone Alert');
-            if (device.location) {
-                dev.set('latitude', device.location.latitude);
-                dev.set('longitude', device.location.longitude);
-                dev.set('positionType', device.location.positionType);
-                dev.set('timeStamp', device.location.timeStamp);
-                dev.set('Map-URL', 'http://maps.google.com/maps?z=15&t=m&q=loc:' + device.location.latitude + '+' + device.location.longitude);
+    function doIt() {
+        if (i >= appleDevices.length) {
+            devices.update();
+            if (cb) cb();
+            return;
+        }
+        var device = appleDevices[i++];
+        var dev = new devices.CDevice(0, '');
+        dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: {id: device.id}});
+        dev.set('batteryLevel', { val: (device.batteryLevel >> 0) * 100, common: { unit: '%'}});
+        dev.set('lostModeCapable', device.lostModeCapable);
+        dev.set('alert', 'ioBroker Find my iPhone Alert');
+        dev.set('refresh', false);
+        if (device.location) {
+            dev.set('positionType', device.location.positionType);
+            dev.set('timeStamp', device.location.timeStamp);
+            var tsStr = adapter.formatDate(new Date(device.location.timeStamp), 'YYYY-MM-DD hh:mm:ss');
+            dev.set('time', tsStr);
+
+            var changed = dev.set('latitude', device.location.latitude);
+            changed |= dev.set('longitude', device.location.longitude);
+            if (changed) {
+                dev.set('map-url', 'http://maps.google.com/maps?z=15&t=m&q=loc:' + device.location.latitude + '+' + device.location.longitude);
                 iCloud.getDistanceOfDevice(device, iCloud.latitude, iCloud.longitude, function (err, result) {
                     if (!err && result && result.distance && result.duration) {
                         dev.set('distance', result.distance.text);
@@ -100,12 +215,29 @@ function createDevices (cb) {
                         setTimeout(doIt, 10);
                     });
                 });
-            } else {
-                setTimeout(doIt, 10);
+                return;
             }
-
         }
-        doIt();
+        setTimeout(doIt, 10);
+    }
+    doIt();
+}
+
+function updateDevice(deviceId, cb) {
+    iCloud.refresh(deviceId, function (err, appleDevices) {
+        if (err || !appleDevices) return;
+        setOurStates(appleDevices, cb);
+    });
+}
+
+
+function createDevices (cb) {
+
+    var dev = new devices.CDevice(0, '');
+    dev.set('refresh', false);
+    iCloud.get(function (err, appleDevices) {
+        if (err || !appleDevices) return;
+        setOurStates(appleDevices, cb);
     });
 }
 
@@ -150,9 +282,6 @@ function getLocationByIP(obj, cb) {
     });
 }
 
-function updateDevices() {
-    createDevices();
-}
 
 function main() {
 
