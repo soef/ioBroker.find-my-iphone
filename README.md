@@ -4,9 +4,14 @@
 ioBroker Adapter to find Apple devices
 
 #### Info
-first release and beta version
+First release and beta version
 
-###### How to use the command state:
+The adapter tries to read its own location from the adapter ioBroker.javascript. If it is not available, the location of the external IP will be determined. Otherwise 0.0+0.0 will be taken. The location is used zu calculate the distance to the device.
+
+#### States
+Use the "alert" state of each device to play a sound on that device. The text of the alert state will be shown on the device.
+
+Use the "refresh" state in the root, to refresh all devices.
 
 #### Installation
 Execute the following command in the iobroker root directory (e.g. in /opt/iobroker)
