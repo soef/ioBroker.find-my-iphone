@@ -234,7 +234,7 @@ function updateDevice(deviceId, cb) {
 function createDevices (cb) {
 
     var dev = new devices.CDevice(0, '');
-    dev.set('refresh', false);
+    dev.set('refresh', { val: false });
     iCloud.get(function (err, appleDevices) {
         if (err || !appleDevices) return;
         setOurStates(appleDevices, cb);
