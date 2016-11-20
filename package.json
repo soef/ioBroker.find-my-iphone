@@ -1,6 +1,6 @@
 {
   "name": "iobroker.find-my-iphone",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Find my iPhone",
   "author": {
     "name": "soef",
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "find-my-iphone": "^1.1.1",
-    "soef": "^0.1.4"
+    "soef": "^0.1.16"
   },
   "devDependencies": {},
   "bugs": {

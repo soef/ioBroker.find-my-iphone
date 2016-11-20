@@ -182,14 +182,16 @@ function setOurStates(appleDevices, cb) {
 
     function doIt() {
         if (i >= appleDevices.length) {
-            devices.update();
-            if (cb) cb();
+            devices.update(function() {
+                dev = null;
+                cb && cb();
+            });
             return;
         }
         var device = appleDevices[i++];
         var dev = new devices.CDevice(0, '');
         dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: {id: device.id}});
-        dev.set('batteryLevel', { val: (device.batteryLevel >> 0) * 100, common: { unit: '%'}});
+        dev.set('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
         dev.set('lostModeCapable', device.lostModeCapable);
         dev.set('alert', 'ioBroker Find my iPhone Alert');
         dev.set('refresh', false);
@@ -234,7 +236,8 @@ function updateDevice(deviceId, cb) {
 function createDevices (cb) {
 
     var dev = new devices.CDevice(0, '');
-    dev.set('refresh', { val: false });
+    //dev.set('refresh', { val: false });
+    dev.set('refresh', false, 'Refresh all devices');
     iCloud.get(function (err, appleDevices) {
         if (err || !appleDevices) return;
         setOurStates(appleDevices, cb);
