@@ -270,7 +270,8 @@ function normalizeConfig(dev) {
 
 function getLocationByIP(obj, cb) {
     var timeout = setTimeout(cb, 3000);
-    var request = require(__dirname + "/node_modules/find-my-iphone/node_modules/request");
+    //var request = require(__dirname + "/node_modules/find-my-iphone/node_modules/request");
+    var request = require("request");
     request.get({ url: "http://freegeoip.net/json/" }, function (err, res) {
         if (!err && res && res.body) {
             try {

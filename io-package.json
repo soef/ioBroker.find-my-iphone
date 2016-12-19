@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "title": "Find my iPhone",
     "desc": {
       "en": "Find my Apple device (iPhone, iPad, iMac...)",
