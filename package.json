@@ -1,6 +1,6 @@
 {
   "name": "iobroker.find-my-iphone",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Find my iPhone",
   "author": {
     "name": "soef",
@@ -31,10 +31,21 @@
     "find-my-iphone": "^1.1.1",
     "soef": "^0.1.16"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-replace": "^0.9.3",
+    "grunt-contrib-jshint": "^0.11.2",
+    "grunt-jscs": "^2.0.0",
+    "grunt-http": "^1.6.0",
+    "mocha": "^2.3.4",
+    "chai": "^3.4.1"
+  },
   "bugs": {
     "url": "https://github.com/soef/iobroker.find-my-iphone/issues"
   },
   "readmeFilename": "README.md",
-  "main": "find-my-iphone.js"
+  "main": "find-my-iphone.js",
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha"
+  }
 }
