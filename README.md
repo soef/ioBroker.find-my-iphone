@@ -1,5 +1,9 @@
 ![Logo](admin/find-my-iphone.png)
 
+
+[![NPM version](http://img.shields.io/npm/v/iobroker.find-my-iphone.svg)](https://www.npmjs.com/package/iobroker.find-my-iphone)
+[![Tests](http://img.shields.io/travis/soef/ioBroker.find-my-iphone/master.svg)](https://travis-ci.org/soef/ioBroker.find-my-iphone)
+
 #### ioBroker.find-my-iphone 
 ioBroker Adapter to find Apple devices
 
