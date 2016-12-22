@@ -1,11 +1,16 @@
 ![Logo](admin/find-my-iphone.png)
 
+#### ioBroker.find-my-iphone 
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.find-my-iphone.svg)](https://www.npmjs.com/package/iobroker.find-my-iphone)
 [![Tests](http://img.shields.io/travis/soef/ioBroker.find-my-iphone/master.svg)](https://travis-ci.org/soef/ioBroker.find-my-iphone)
+[![Build status](https://ci.appveyor.com/api/projects/status/9n5s1wgam59b4fv9?svg=true)](https://ci.appveyor.com/project/soef/iobroker-find-my-iphone)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/soef/iobroker.find-my-iphone/blob/master/LICENSE)
 
-#### ioBroker.find-my-iphone 
+#### Description
+
 ioBroker Adapter to find Apple devices
+
 
 #### Info
 First release and beta version
@@ -22,6 +27,7 @@ Execute the following command in the iobroker root directory (e.g. in /opt/iobro
 ```
 npm install iobroker.find-my-iphone 
 ```
+<!--
 ### License
 The MIT License (MIT)
 
@@ -44,3 +50,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+-->
