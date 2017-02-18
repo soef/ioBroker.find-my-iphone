@@ -1,0 +1,6 @@
+.gitattributes
+.gitignore
+.git
+test
+.travis.yml
+appveyor.yml
