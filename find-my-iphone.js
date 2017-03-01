@@ -7,9 +7,6 @@ var soef = require('soef');
 var debug = false;
 var iCloud = require("find-my-iphone").findmyphone;
 
-//inactiveTime:
-//nextPollTime:
-
 iCloud.playSound = function(deviceId, message, callback) {
     var options = {
         url: this.base_path + "/fmipservice/client/web/playSound",
@@ -123,23 +120,12 @@ iCloud.lostDevice = function(deviceId, ownerNbr, text, emailUpdates, callback) {
     this.iRequest.post(options, callback);
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var adapter = soef.Adapter (
     main,
     onStateChange,
-    {
-        name: 'find-my-iphone',
-        //discover: function (callback) {
-        //},
-        //install: function (callback) {
-        //},
-        uninstall: function (callback) {
-        }
-        //objectChange: function (id, obj) {
-        //}
-    }
+    { name: 'find-my-iphone' }
 );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +139,7 @@ function onStateChange(id, state) {
     switch (stateName || 'root') {
         case 'alert':
             if (device && device.native && device.native.id) {
-                var msg = typeof state.val == 'strimg' && state.val != "" ? state.val : 'ioBroker Find my iPhone Alert';
+                var msg = typeof state.val == 'string' && state.val != "" ? state.val : 'ioBroker Find my iPhone Alert';
                 iCloud.alertDevice(device.native.id, msg, function (err) {
                 });
             }

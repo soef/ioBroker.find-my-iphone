@@ -1,8 +1,14 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "title": "Find my iPhone",
+    "news": {
+      "0.1.0": {
+        "en": "Typo fix for text of alert message",
+        "de": "Tipfehler bezüglich Text der Alert Nachricht"
+      }
+    },
     "desc": {
       "en": "Find my Apple device (iPhone, iPad, iMac...)",
       "de": "Find my Apple device (iPhone, iPad, iMac...)",
