@@ -1,6 +1,6 @@
 {
   "name": "iobroker.find-my-iphone",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Find my iPhone",
   "author": {
     "name": "soef",
@@ -21,7 +21,8 @@
     "iPad",
     "macBook",
     "MacMini",
-    "iMac"
+    "iMac",
+    "Find my"
   ],
   "repository": {
     "type": "git",

@@ -105,20 +105,29 @@ iCloud.lostDevice = function(deviceId, ownerNbr, text, emailUpdates, callback) {
             "lostModeEnabled": true,
             "trackingEnabled": true,
             "device": deviceId,
-            //"passcode": "",
-            "userText": false
+            "passcode": "111111",
+            //"userText": false
+            "userText": "userText"
         }
     };
-
-    if (ownerNbr) {
-        options.json.ownerNbr = ownerNbr;
-    }
-    if (text) {
-        options.json.userText = true;
-        options.json.text = text;
+    if (typeof ownerNbr === 'object') {
+        var o = ownerNbr;
+        if (o.ownerNbr) options.json.ownerNbr = o.ownerNbr;
+        if (o.passcode) options.json.passcode = o.passcode;
+        if (o.text) {
+            options.json.text = o.text;
+            options.json.userText = true;
+        }
+    } else {
+        if (ownerNbr) options.json.ownerNbr = ownerNbr;
+        if (text) {
+            options.json.userText = true;
+            options.json.text = text;
+        }
     }
     this.iRequest.post(options, callback);
 };
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -137,6 +146,15 @@ function onStateChange(id, state) {
     devices.invalidate(id);
     var device = devices.get(deviceName);
     switch (stateName || 'root') {
+        case 'lost':
+            var options, ar;
+            ar = state.val.toString().split(';');
+            options = { text: ar.shift() };
+            if (ar.length) options.ownerNbr = ar.shift();
+            if (ar.length) options.passcode = ar.shift();
+            iCloud.lostDevice (device.native.id, options, function(err, data) {
+            });
+            break;
         case 'alert':
             if (device && device.native && device.native.id) {
                 var msg = typeof state.val == 'string' && state.val != "" ? state.val : 'ioBroker Find my iPhone Alert';
@@ -180,6 +198,7 @@ function setOurStates(appleDevices, cb) {
         dev.set('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
         dev.set('lostModeCapable', device.lostModeCapable);
         dev.set('alert', 'ioBroker Find my iPhone Alert');
+        dev.set('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
         dev.set('refresh', false);
         if (device.location) {
             dev.set('positionType', device.location.positionType);

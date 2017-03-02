@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "title": "Find my iPhone",
     "news": {
+      "0.1.3": {
+        "en": "Function for Lost Mode added",
+        "de": "Funktion Mode Verloren hinzugefügt"
+      },
       "0.1.0": {
         "en": "Typo fix for text of alert message",
         "de": "Tipfehler bezüglich Text der Alert Nachricht"
