@@ -7,6 +7,52 @@ var soef = require('soef');
 var debug = false;
 var iCloud = require("find-my-iphone").findmyphone;
 
+//onLogin: function(body, callback) {
+
+iCloud.timedLogout = function (ms) {
+    if (this.logoutTimer) {
+        clearTimeout(this.logoutTimer);
+    }
+    if (ms === undefined) ms = 2000;
+    this.logoutTimer = setTimeout(function() {
+        this.logout();
+    }, ms);
+};
+
+iCloud.post = function (options, callback) {
+    var self = this;
+    
+    function retry() {
+        var origOnLogin = selg.onLogin;
+        self.onLogin = function (body, callback) {
+            self.onLogin = origOnLogin;
+            callback && callback ();
+        };
+        self.logout();
+        self.init (function () {
+            self.iRequest.post (options, function (err, data) {
+                if (err) {
+                    adapter.log.error('could not send request. Error: ' + JSON.stringify(err));
+                }
+                //self.logout ();
+                callback && callback ();
+                callback = null;
+            });
+        })
+    }
+    
+    var timer = setTimeout(retry, 3000);
+    self.iRequest.post(options, function(err, data, body) {
+        if (timer) clearTimeout(timer);
+        if (err || typeof data !== 'object' || data.statusCode !== 200) {
+            adapter.log.debug('First try to send request faild. statusCode=' + (data ? data.statusCode : 'unknown'));
+            return retry();
+        }
+        callback && callback(err, data, body);
+        callback = null;
+    });
+};
+
 iCloud.playSound = function(deviceId, message, callback) {
     var options = {
         url: this.base_path + "/fmipservice/client/web/playSound",
@@ -15,7 +61,8 @@ iCloud.playSound = function(deviceId, message, callback) {
             "device": deviceId
         }
     };
-    this.iRequest.post(options, callback);
+    //this.iRequest.post(options, callback);
+    this.post(options, callback);
 };
 
 iCloud.sendMessage = function(deviceId, message, sound, callback) {
@@ -33,7 +80,8 @@ iCloud.sendMessage = function(deviceId, message, sound, callback) {
             "text": message
         }
     };
-    this.iRequest.post(options, callback);
+    //this.iRequest.post(options, callback);
+    this.post(options, callback);
 };
 
 iCloud.alertDevice = function(deviceId, message, callback) {
@@ -125,7 +173,8 @@ iCloud.lostDevice = function(deviceId, ownerNbr, text, emailUpdates, callback) {
             options.json.text = text;
         }
     }
-    this.iRequest.post(options, callback);
+    //this.iRequest.post(options, callback);
+    this.post(options, callback);
 };
 
 
@@ -197,8 +246,10 @@ function setOurStates(appleDevices, cb) {
         dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: {id: device.id}});
         dev.set('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
         dev.set('lostModeCapable', device.lostModeCapable);
-        dev.set('alert', 'ioBroker Find my iPhone Alert');
-        dev.set('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
+        // dev.set('alert', 'ioBroker Find my iPhone Alert');
+        // dev.set('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
+        dev.createNew('alert', 'ioBroker Find my iPhone Alert');
+        dev.createNew('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
         dev.set('refresh', false);
         if (device.location) {
             dev.set('positionType', device.location.positionType);
@@ -311,4 +362,3 @@ function main() {
     });
     adapter.subscribeStates('*');
 }
-

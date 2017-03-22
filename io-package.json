@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "title": "Find my iPhone",
     "news": {
+      "0.1.4": {
+        "en": "Relogin, if sending a request fails",
+        "de": "Erneutes Login, wenn das Senden fehlschlägt"
+      },
       "0.1.3": {
         "en": "Function for Lost Mode added",
         "de": "Funktion Mode Verloren hinzugefügt"
