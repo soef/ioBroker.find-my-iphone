@@ -22,14 +22,11 @@ iCloud.timedLogout = function (ms) {
 iCloud.post = function (options, callback) {
     var self = this;
     
-    function retry() {
-        var origOnLogin = selg.onLogin;
-        self.onLogin = function (body, callback) {
-            self.onLogin = origOnLogin;
-            callback && callback ();
-        };
+    function retry(text) {
+        adapter.log.debug('iCloud.post.retry called ' + text);
         self.logout();
         self.init (function () {
+            adapter.log.debug('iCloud.post.retry - init callback');
             self.iRequest.post (options, function (err, data) {
                 if (err) {
                     adapter.log.error('could not send request. Error: ' + JSON.stringify(err));
@@ -41,17 +38,22 @@ iCloud.post = function (options, callback) {
         })
     }
     
-    var timer = setTimeout(retry, 3000);
+    var timer = setTimeout(retry, 5000, 'called from timeout');
     self.iRequest.post(options, function(err, data, body) {
         if (timer) clearTimeout(timer);
         if (err || typeof data !== 'object' || data.statusCode !== 200) {
             adapter.log.debug('First try to send request faild. statusCode=' + (data ? data.statusCode : 'unknown'));
-            return retry();
+            adapter.log.debug('calling retry...');
+            setTimeout(function() {
+                retry(' because of error');
+            }, 2000);
+            return;
         }
         callback && callback(err, data, body);
         callback = null;
     });
 };
+
 
 iCloud.playSound = function(deviceId, message, callback) {
     var options = {
@@ -344,7 +346,6 @@ function getLocationByIP(obj, cb) {
 
 
 function main() {
-
     normalizeConfig(adapter.config);
     iCloud.apple_id = adapter.config.username;
     iCloud.password = adapter.config.password;

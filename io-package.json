@@ -1,10 +1,10 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "title": "Find my iPhone",
     "news": {
-      "0.1.4": {
+      "0.1.5": {
         "en": "Relogin, if sending a request fails",
         "de": "Erneutes Login, wenn das Senden fehlschlägt"
       },
