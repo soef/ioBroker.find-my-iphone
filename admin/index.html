@@ -35,6 +35,31 @@
             "de": "Pollintervall",
             "en": "Poll Intervall"
         },
+        "2FA": {
+            "en": "Key for two-step verification",
+            "de": "Key für 2 Faktor-Authentifizierung"
+        },
+        "Two-step verification": {
+            "en": "Two-step verification:",
+            "de": "Zwei-Faktor-Authentifizierung:"
+        },
+        "Step1": {
+            "en": "Step 1: Fill out only username and password, Save and start the adapter",
+            "de": "Step 1: Nur den Usernamen und das Passwort einragen, speichern und den adapter starten."
+        },
+        "Step2": {
+            "en": "Step 2: Confirm your registration on one of your devices.",
+            "de": "Step 2: Registrierung auf irgendeinem deiner Gerät bestätigen."
+        },
+        "Step3": {
+            "en": "Step 3: Now enter the 6-digit code in the Key-Field.",
+            "de": "Step 3: Nur den 6-stelligen Code ins Key-Feld eintragen."
+        },
+        "leave empty": {
+            "en": "(else leave enpty)",
+            "de": "(sonst frei lassen)"
+        }
+
     };
 
 
@@ -88,6 +113,7 @@
 //        });
 
         if (!settings) return;
+        if (settings.key2Step === undefined) settings.key2Step = '';
         changed = true;
         g_onChange = onChange;
 
@@ -242,6 +268,18 @@
         background-color: #ffff99;
     }
 
+    td {
+        font-size: 13px;
+        padding-left:1px;
+        padding-right: 4px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+    input {
+        font-size: 13px;
+    }
+
+
 </style>
 
 
@@ -257,8 +295,15 @@
     <table>
         <tr><td class="translate">Apple ID</td><td><input class="value" id="username" type="input" size="15" /></td></tr>
         <tr><td class="translate">Password</td><td><input class="value" id="password" type="password" size="15" /></td></tr>
+        <tr><td class="translate">2FA</td><td><input class="value" id="key2Step" type="password" size="20" /></td><td class="translate">leave empty</td></tr>
         <!--td><button id="find"><span class="translate">Find a device</span></button></td-->
     </table>
+    <table>
+        <tr><td style="font-weight: bold;" class="translate">Two-step verification</td></tr>
+        <tr><td class="translate">Step1</td></tr>
+        <tr><td class="translate">Step2</td></tr>
+        <tr><td class="translate">Step3</td></tr>
+
     <div style="padding: 10px"></div>
 
 </div>

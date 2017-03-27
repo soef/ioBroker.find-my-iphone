@@ -1,10 +1,14 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.1.5",
+    "version": "0.1.7",
     "title": "Find my iPhone",
     "news": {
-      "0.1.5": {
+      "0.1.7": {
+        "en": "Workaround for Two-step verification",
+        "de": "Workaround für Zwei-Faktor-Authentisierung"
+      },
+      "0.1.6": {
         "en": "Relogin, if sending a request fails",
         "de": "Erneutes Login, wenn das Senden fehlschlägt"
       },

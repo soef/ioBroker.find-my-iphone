@@ -55,6 +55,29 @@ iCloud.post = function (options, callback) {
 };
 
 
+iCloud.postx = function (options, callback) {
+    var self = this;
+
+    var doIt = function() {
+        self.init (function () {
+            adapter.log.debug ('iCloud.post.retry - init callback');
+            self.iRequest.post (options, function (err, data, body) {
+                if (err) {
+                    adapter.log.error ('could not send request. Error: ' + JSON.stringify (err));
+                    self.logout();
+                    doIt && doIt();
+                    doIt = null;
+                    return;
+                }
+                callback && callback ();
+                callback = null;
+            });
+        });
+    };
+    doIt();
+};
+
+
 iCloud.playSound = function(deviceId, message, callback) {
     var options = {
         url: this.base_path + "/fmipservice/client/web/playSound",
@@ -349,6 +372,7 @@ function main() {
     normalizeConfig(adapter.config);
     iCloud.apple_id = adapter.config.username;
     iCloud.password = adapter.config.password;
+    if (adapter.config.key2Step) iCloud.password += adapter.config.key2Step;
 
     adapter.getForeignObject('system.adapter.javascript.0', function(err, obj) {
         if (!err && obj && obj.native) {
