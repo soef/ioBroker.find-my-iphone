@@ -87,7 +87,7 @@ function createOurState (device, cb) {
     dev.createNew('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
     dev.createNew('alert', 'ioBroker Find my iPhone Alert');
     dev.createNew('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
-    dev.createNew('refresh', { val: false, common: { name: 'Refresh all devices (refreshClient)' } });
+    dev.createNew('refresh', { val: false, common: { name: 'Refresh this device with shouldLocate=true' } });
     dev.createNew('isLocating', { val: !!device.isLocating, common: { write: false }} );
     updateOurState(device, dev, cb);
 }
@@ -361,6 +361,7 @@ function createDevices (callback) {
     //     this.setState(soef.ns.no(id), val, ack);
     // };
 
+    devices.root.createNew('refresh', { val: false, common: { name: 'Refresh all devices (refreshClient with shouldLocate=false)' } });
     forEachAppleDevice ('all', createOurState, function () {
         callback && callback ();
     });
