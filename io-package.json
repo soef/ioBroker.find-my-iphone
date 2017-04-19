@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.1.7",
+    "version": "0.2.0",
     "title": "Find my iPhone",
     "news": {
+      "0.2.0": {
+        "en": "Overworked and mostly rewritten",
+        "de": "Überarbeitet und größtenteils neugeschrieben"
+      },
       "0.1.7": {
         "en": "Workaround for Two-step verification",
         "de": "Workaround für Zwei-Faktor-Authentisierung"

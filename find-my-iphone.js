@@ -1,217 +1,37 @@
 ﻿"use strict";
 
 var soef = require('soef');
+var ICloud =  require(__dirname + '/lib/icloud');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var debug = false;
-var iCloud = require("find-my-iphone").findmyphone;
-
-//onLogin: function(body, callback) {
-
-iCloud.timedLogout = function (ms) {
-    if (this.logoutTimer) {
-        clearTimeout(this.logoutTimer);
-    }
-    if (ms === undefined) ms = 2000;
-    this.logoutTimer = setTimeout(function() {
-        this.logout();
-    }, ms);
-};
-
-iCloud.post = function (options, callback) {
-    var self = this;
-    
-    function retry(text) {
-        adapter.log.debug('iCloud.post.retry called ' + text);
-        self.logout();
-        self.init (function () {
-            adapter.log.debug('iCloud.post.retry - init callback');
-            self.iRequest.post (options, function (err, data) {
-                if (err) {
-                    adapter.log.error('could not send request. Error: ' + JSON.stringify(err));
-                }
-                //self.logout ();
-                callback && callback ();
-                callback = null;
-            });
-        })
-    }
-    
-    var timer = setTimeout(retry, 5000, 'called from timeout');
-    self.iRequest.post(options, function(err, data, body) {
-        if (timer) clearTimeout(timer);
-        if (err || typeof data !== 'object' || data.statusCode !== 200) {
-            adapter.log.debug('First try to send request faild. statusCode=' + (data ? data.statusCode : 'unknown'));
-            adapter.log.debug('calling retry...');
-            setTimeout(function() {
-                retry(' because of error');
-            }, 2000);
-            return;
-        }
-        callback && callback(err, data, body);
-        callback = null;
-    });
-};
-
-
-iCloud.postx = function (options, callback) {
-    var self = this;
-
-    var doIt = function() {
-        self.init (function () {
-            adapter.log.debug ('iCloud.post.retry - init callback');
-            self.iRequest.post (options, function (err, data, body) {
-                if (err) {
-                    adapter.log.error ('could not send request. Error: ' + JSON.stringify (err));
-                    self.logout();
-                    doIt && doIt();
-                    doIt = null;
-                    return;
-                }
-                callback && callback ();
-                callback = null;
-            });
-        });
-    };
-    doIt();
-};
-
-
-iCloud.playSound = function(deviceId, message, callback) {
-    var options = {
-        url: this.base_path + "/fmipservice/client/web/playSound",
-        json: {
-            "subject": message,
-            "device": deviceId
-        }
-    };
-    //this.iRequest.post(options, callback);
-    this.post(options, callback);
-};
-
-iCloud.sendMessage = function(deviceId, message, sound, callback) {
-    if (typeof sound == 'function') {
-        callback = sound;
-        sound = true;
-    }
-    var options = {
-        url: this.base_path + "/fmipservice/client/web/sendMessage",
-        json: {
-            "device": deviceId,
-            "sound": !!sound,
-            "subject": 'ioBroker',
-            "userText": true,
-            "text": message
-        }
-    };
-    //this.iRequest.post(options, callback);
-    this.post(options, callback);
-};
-
-iCloud.alertDevice = function(deviceId, message, callback) {
-    //this.sendMessage(deviceId, message, true, callback);
-    this.playSound(deviceId, message, callback);
-};
-
-iCloud.refresh = function(deviceId, callback) {
-    if (typeof deviceId == 'function') {
-        callback = deviceId;
-        deviceId = 'all';
-    }
-    var options = {
-        url: this.base_path + "/fmipservice/client/web/refreshClient",
-        json: {
-            "clientContext": {
-
-                "appName": "iCloud Find (Web)",
-                "appVersion": "2.0",
-                "timezone": "Europe/Berlin", //"US/Eastern",
-                "inactiveTime": 3571,
-                "apiVersion": "3.0",
-
-                "fmly": true,
-                "shouldLocate": true,
-                "selectedDevice": deviceId
-            }
-        }
-    };
-    this.iRequest.post(options, function(err,res) {
-        if (err || !res || !res.body || !res.body.content) {
-            return callback(err);
-        }
-        callback(0, res.body.content);
-    });
-};
-
-iCloud.get = function (callback) {
-    this.init(function(err, res, body) {
-        if (err || !res || res.statusCode != 200 || !body || !body.content) {
-            return callback (err);
-        }
-        callback(0, body.content);
-    });
-};
-
-iCloud.logout = function () {
-    delete this.jar;
-};
-
-iCloud.lostDevice = function(deviceId, ownerNbr, text, emailUpdates, callback) {
-    if (typeof emailUpdates == 'function') {
-        callback = emailUpdates;
-        emailUpdates = false;
-    }
-    if (typeof text == 'function') {
-        callback = text;
-        text = null;
-    }
-    if (typeof ownerNbr == 'function') {
-        callback = ownerNbr;
-        ownerNbr = null;
-    }
-    var options = {
-        method: "POST",
-        url: this.base_path + "/fmipservice/client/web/lostDevice",
-        json: {
-            "emailUpdates": emailUpdates || false,
-            "lostModeEnabled": true,
-            "trackingEnabled": true,
-            "device": deviceId,
-            "passcode": "111111",
-            //"userText": false
-            "userText": "userText"
-        }
-    };
-    if (typeof ownerNbr === 'object') {
-        var o = ownerNbr;
-        if (o.ownerNbr) options.json.ownerNbr = o.ownerNbr;
-        if (o.passcode) options.json.passcode = o.passcode;
-        if (o.text) {
-            options.json.text = o.text;
-            options.json.userText = true;
-        }
-    } else {
-        if (ownerNbr) options.json.ownerNbr = ownerNbr;
-        if (text) {
-            options.json.userText = true;
-            options.json.text = text;
-        }
-    }
-    //this.iRequest.post(options, callback);
-    this.post(options, callback);
-};
-
+soef._extendObject_ = true;
+var refreshTimer = soef.Timer();
+var iCloud;
+var locationToFixedVal = 4;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var adapter = soef.Adapter (
     main,
     onStateChange,
+    onUnload,
     { name: 'find-my-iphone' }
 );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function onUnload(cb) {
+    refefreshTimer.clear();
+    if (iCloud) iCloud.logout();
+    for (var i in devices) {
+        if (devices[i].refreshTimer) {
+            clearTimeout(devices[i].refreshTimer);
+            delete devices[i].refreshTimer
+        }
+    }
+    iCloud = null;
+}
 
 function onStateChange(id, state) {
     var ar = id.split('.');
@@ -227,6 +47,7 @@ function onStateChange(id, state) {
             if (ar.length) options.ownerNbr = ar.shift();
             if (ar.length) options.passcode = ar.shift();
             iCloud.lostDevice (device.native.id, options, function(err, data) {
+                 setTimeout(manUpdateDevice, 2000);
             });
             break;
         case 'alert':
@@ -237,17 +58,20 @@ function onStateChange(id, state) {
             }
             break;
         case 'refresh':
-            devices.root.setex(id, false);
             if (device && device.native && device.native.id) {
-                updateDevice(device.native.id);
+                updateWithTimer(device, state.val);
             }
+            break;
+        case 'lostMode':
+            if (!state.val) iCloud.stopLostMode(device.native.id, function() {
+                setTimeout(manUpdateDevice, 2000);
+            });
             break;
         case 'root':
             switch(deviceName) {
                 case 'refresh':
-                    //devices.root.set('refresh', false);
-                    devices.root.setex(id, false);
-                    updateDevice();
+                    devices.setState(id, false);
+                    manUpdateDevice();
                     break;
             }
     }
@@ -255,76 +79,292 @@ function onStateChange(id, state) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function setOurStates(appleDevices, cb) {
-    var i = 0;
+function createOurState (device, cb) {
+    var dev = new devices.CDevice(0, '');
+    var native = { id: device.id };
+    if (device.lostDevice) native.lostDevice = device.lostDevice;
+    dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: native });
+    dev.createNew('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
+    dev.createNew('alert', 'ioBroker Find my iPhone Alert');
+    dev.createNew('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
+    dev.createNew('refresh', { val: false, common: { name: 'Refresh all devices (refreshClient)' } });
+    dev.createNew('isLocating', { val: !!device.isLocating, common: { write: false }} );
+    updateOurState(device, dev, cb);
+}
 
-    function doIt() {
-        if (i >= appleDevices.length) {
-            devices.update(function() {
-                dev = null;
-                cb && cb();
+function updateOurState(device, dev, cb) {
+    if (typeof dev !== 'object') {
+        cb = dev;
+        dev = new devices.CDevice(0, '');
+        var native = { id: device.id };
+        if (device.lostDevice) native.lostDevice = device.lostDevice;
+        dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: native });
+    }
+    dev.set('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
+    dev.set('lostModeCapable', device.lostModeCapable);
+    dev.set('isLocating', !!device.isLocating);
+    if (device.location) {
+        dev.set('positionType', device.location.positionType);
+        dev.set('timeStamp', device.location.timeStamp);
+        var tsStr = adapter.formatDate(new Date(device.location.timeStamp), 'YYYY-MM-DD hh:mm:ss');
+        dev.set('time', tsStr);
+        if (device.name === 'iPhone-7-FL') {
+            var xyz = 1;
+        }
+        dev.set('lostMode', (!!device.lostDevice && (~~device.lostDevice.statusCode) >= 2204));
+        
+        // var changed = dev.set('latitude', device.location.latitude);
+        // changed |= dev.set('longitude', device.location.longitude);
+        var changed = dev.set('latitude', device.location.latitude.toFixed(locationToFixedVal));
+        changed |= dev.set('longitude', device.location.longitude.toFixed(locationToFixedVal));
+        if (changed) {
+            dev.set('map-url', 'http://maps.google.com/maps?z=15&t=m&q=loc:' + device.location.latitude + '+' + device.location.longitude);
+            iCloud.getDistance(device, function (err, result) {
+                if (!err && result && result.distance && result.duration) {
+                    dev.set('distance', result.distance.text);
+                    dev.set('duration', result.duration.text);
+                }
+                iCloud.getAddressOfLocation(device, function (err, location) {
+                    if (!err && result) {
+                        dev.set('location', location);
+                    }
+                    cb && setTimeout(cb, 10);
+                });
             });
             return;
         }
-        var device = appleDevices[i++];
-        var dev = new devices.CDevice(0, '');
-        dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: {id: device.id}});
-        dev.set('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
-        dev.set('lostModeCapable', device.lostModeCapable);
-        // dev.set('alert', 'ioBroker Find my iPhone Alert');
-        // dev.set('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
-        dev.createNew('alert', 'ioBroker Find my iPhone Alert');
-        dev.createNew('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
-        dev.set('refresh', false);
-        if (device.location) {
-            dev.set('positionType', device.location.positionType);
-            dev.set('timeStamp', device.location.timeStamp);
-            var tsStr = adapter.formatDate(new Date(device.location.timeStamp), 'YYYY-MM-DD hh:mm:ss');
-            dev.set('time', tsStr);
+    }
+    cb && setTimeout(cb, 10);
+}
 
-            var changed = dev.set('latitude', device.location.latitude);
-            changed |= dev.set('longitude', device.location.longitude);
-            if (changed) {
-                dev.set('map-url', 'http://maps.google.com/maps?z=15&t=m&q=loc:' + device.location.latitude + '+' + device.location.longitude);
-                iCloud.getDistanceOfDevice(device, iCloud.latitude, iCloud.longitude, function (err, result) {
-                    if (!err && result && result.distance && result.duration) {
-                        dev.set('distance', result.distance.text);
-                        dev.set('duration', result.duration.text);
-                    }
-                    iCloud.getLocationOfDevice(device, function (err, location) {
-                        if (!err && result) {
-                            dev.set('location', location);
-                        }
-                        setTimeout(doIt, 10);
-                    });
-                });
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function manUpdateDevice(deviceId, cb) {
+    if (iCloud.authenticated === undefined) iCloud.authenticated = false;
+    updateDevice(deviceId, cb);
+}
+
+function updateWithTimer(device, val, cb) {
+    var bo, cnt, time, timeout = 30000;
+    //devices.setState({ device: device.common.name, state: 'isLocating', val: true });
+    devices.setState({ device: device.common.name }, 'isLocating', true );
+    val = valtype (val);
+    if ((bo = typeof val === 'boolean')) {
+        cnt = 4;
+        timeout = 15000
+    } else {
+        if ((time = ~~val) <= 0) return;  // time to refresh in minutes
+        cnt = time * 2;
+    }
+    if (device.refreshTimer !== undefined) clearTimeout (device.refreshTimer);
+    if (iCloud.authenticated === undefined) iCloud.authenticated = false;
+
+    var req = { device: device.native.id, shouldLocate: true };
+    var doIt = function () {
+        manUpdateDevice (req, function (appleDevice) {
+            if (cnt-- <= 0 || (bo && appleDevice.isLocating === false)) {
+                delete device.refreshTimer;
+                devices.setState({ device: device.common.name, state: 'refresh', val: false });
                 return;
             }
+            req.shouldLocate = !bo;
+            device.refreshTimer = setTimeout (doIt, timeout);
+        });
+    };
+    doIt ();
+}
+
+
+// function xsetOurStates(appleDevices, cb) {
+//     var i = 0;
+//
+//     function doIt() {
+//         if (i >= appleDevices.length) {
+//             devices.update(function() {
+//                 dev = null;
+//                 cb && cb();
+//             });
+//             return;
+//         }
+//         var device = appleDevices[i++];
+//         var dev = new devices.CDevice(0, '');
+//         //dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: {id: device.id}});
+//         //dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: {id: device.id, lostDevice: device.lostDevice ? device.lostDevice : {} } });
+//         var native = { id: device.id };
+//         if (device.lostDevice) native.lostDevice = device.lostDevice;
+//         dev.setDevice(device.name, {common: {name: device.name, role: 'device'}, native: native });
+//         dev.set('batteryLevel', { val: (device.batteryLevel * 100) >> 0, common: { unit: '%'}});
+//         dev.set('lostModeCapable', device.lostModeCapable);
+//         // dev.set('alert', 'ioBroker Find my iPhone Alert');
+//         // dev.set('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
+//         dev.createNew('alert', 'ioBroker Find my iPhone Alert');
+//         dev.createNew('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
+//         dev.createNew('refresh', false);
+//         dev.set('isLocating', { val: !!device.isLocating, common: { write: false }} );
+//         if (device.location) {
+//             dev.set('positionType', device.location.positionType);
+//             dev.set('timeStamp', device.location.timeStamp);
+//             var tsStr = adapter.formatDate(new Date(device.location.timeStamp), 'YYYY-MM-DD hh:mm:ss');
+//             dev.set('time', tsStr);
+//             if (device.name === 'iPhone-7-FL') {
+//                 var xyz = 1;
+//             }
+//             dev.set('lostMode', (!!device.lostDevice && (~~device.lostDevice.statusCode) >= 2204));
+//
+//             var changed = dev.set('latitude', device.location.latitude);
+//             changed |= dev.set('longitude', device.location.longitude);
+//             if (changed) {
+//                 dev.set('map-url', 'http://maps.google.com/maps?z=15&t=m&q=loc:' + device.location.latitude + '+' + device.location.longitude);
+//                 iCloud.getDistance(device, function (err, result) {
+//                     if (!err && result && result.distance && result.duration) {
+//                         dev.set('distance', result.distance.text);
+//                         dev.set('duration', result.duration.text);
+//                     }
+//                     iCloud.getAddressOfLocation(device, function (err, location) {
+//                         if (!err && result) {
+//                             dev.set('location', location);
+//                         }
+//                         setTimeout(doIt, 10);
+//                     });
+//                 });
+//                 return;
+//             }
+//         }
+//         setTimeout(doIt, 10);
+//     }
+//     doIt();
+// }
+//
+// function xupdateDevice (deviceId, cb) {
+//     if (typeof deviceId === 'function') {
+//         cb = deviceId;
+//         deviceId = 'all';
+//     }
+//
+//     function call (appleDevices) {
+//         setOurStates (appleDevices, function () {
+//             if (deviceId === 'all' && adapter.config.refreshInterval) refreshTimer.set (updateDevice, adapter.config.refreshInterval);
+//             cb && cb ();
+//         });
+//     }
+//
+//     refreshTimer.clear ();
+//     switch (iCloud.authenticated) {
+//         case undefined:
+//             break;
+//         case false:
+//             iCloud.authenticated = undefined; // only one retry
+//             iCloud.login (function (response) {
+//                 if (iCloud.authenticated) iCloud.initClient (call);
+//             });
+//             return;
+//         case true:
+//             iCloud.refreshClient (deviceId, call);
+//     }
+// }
+//
+// function xgetAppleDevices (deviceId, callback) {
+//     if (typeof deviceId === 'function') {
+//         cb = deviceId;
+//         deviceId = 'all';
+//     }
+//
+//     //refreshTimer.clear();
+//     switch (iCloud.authenticated) {
+//         case undefined:
+//             break;
+//         case false:
+//             iCloud.authenticated = undefined; // only one retry
+//             iCloud.login (function (response) {
+//                 if (iCloud.authenticated) iCloud.initClient (callback);
+//             });
+//             return;
+//         case true:
+//             iCloud.refreshClient (deviceId, callback);
+//     }
+// }
+//
+// function xforEachAppleDevice (deviceId, setCallback, readyCallback) {
+//     getAppleDevices (deviceId, function (appleDevices) {
+//         forEachArrayCallback (appleDevices, devices.update.bind (devices, readyCallback), setCallback);
+//     })
+// }
+//
+// function xforEachAppleDevice (deviceId, setCallback, readyCallback) {
+//     getAppleDevices (deviceId, function (appleDevices) {
+//         forEachArrayCallback (appleDevices,
+//             function () {
+//                 devices.update (function () {
+//                     //dev = null;
+//                     readyCallback && readyCallback ();
+//                 });
+//             },
+//             setCallback
+//         );
+//     })
+// }
+//
+//
+
+// function forEachAppleDevice(deviceId, setCallback, readyCallback) {
+//     if (typeof deviceId === 'function') {
+//         cb = deviceId;
+//         deviceId = 'all';
+//     }
+//     iCloud.refreshClientEx (deviceId, function(appleDevices) {
+//         //forEachArrayCallback (appleDevices, devices.update.bind(devices, readyCallback), setCallback);
+//         //return;
+//         forEachArrayCallback (appleDevices,
+//             function () {
+//                 devices.update (function () {
+//                     //dev = null;
+//                     readyCallback && readyCallback ();
+//                 });
+//             },
+//             setCallback
+//         );
+//     })
+// }
+//
+
+function forEachAppleDevice(deviceId, setCallback, readyCallback) {
+    iCloud.forEachDevice(deviceId, setCallback, devices.update.bind(devices, readyCallback));
+    // iCloud.forEachDevice(deviceId, setCallback, function() {
+    //     devices.update(readyCallback);
+    // });
+}
+
+function updateDevice(deviceId, callback) {
+    var func = updateOurState;
+    if (deviceId && deviceId !== 'all') {
+        func = function(device, doIt) {
+            if (device.id !== deviceId && device.id !== deviceId.device) return doIt();
+            updateOurState(device, callback.bind(1, device));
         }
-        setTimeout(doIt, 10);
     }
-    doIt();
+    forEachAppleDevice(deviceId, func, callback);
 }
 
-function updateDevice(deviceId, cb) {
-    iCloud.refresh(deviceId, function (err, appleDevices) {
-        if (err || !appleDevices) return;
-        setOurStates(appleDevices, cb);
+function createDevices (callback) {
+    // devices.setdcState = function (d, c, s, val, ack) {
+    //     d = normalizedName(d);
+    //     if (c !== undefined) c = normalizedName(c);
+    //     var id = dcs(d,c,s);
+    //     this.setState(id, val, ack);
+    // };
+    // devices.setdState = function (d, s, val, ack) {
+    //     this.setdcState(d, undefined, s, val, ack);
+    // };
+    // devices.orig_setState = devices.setState;
+    
+    // devices.setEx = function (id, val, ack) {
+    //     this.setState(soef.ns.no(id), val, ack);
+    // };
+
+    forEachAppleDevice ('all', createOurState, function () {
+        callback && callback ();
     });
 }
-
-
-function createDevices (cb) {
-
-    var dev = new devices.CDevice(0, '');
-    //dev.set('refresh', { val: false });
-    dev.set('refresh', false, 'Refresh all devices');
-    iCloud.get(function (err, appleDevices) {
-        if (err || !appleDevices) return;
-        setOurStates(appleDevices, cb);
-    });
-}
-
 
 function decrypt(str) {
     if (!str) str = "";
@@ -344,46 +384,99 @@ function decrypt(str) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function normalizeConfig(dev) {
-    dev.username = decrypt(dev.username);
-    dev.password = decrypt(dev.password);
+function normalizeConfig(config) {
+    config.username = decrypt(config.username);
+    config.password = decrypt(config.password);
+    if (config.locationToFixedVal !== undefined) locationToFixedVal = config.locationToFixedVal;
+    //config.refreshInterval = 20000;
 }
 
-function getLocationByIP(obj, cb) {
-    var timeout = setTimeout(cb, 3000);
-    //var request = require(__dirname + "/node_modules/find-my-iphone/node_modules/request");
-    var request = require("request");
-    request.get({ url: "http://freegeoip.net/json/" }, function (err, res) {
-        if (!err && res && res.body) {
-            try {
-                var json = JSON.parse(res.body);
-                obj.longitude = json.longitude;
-                obj.latidude = json.latitude;
-                clearTimeout(timeout);
-                cb();
-            } catch (e) {
-            }
+
+function test () {
+    var client = new ICloud (adapter.config.username, adapter.config.password);
+    
+    const iPadAir = 'tve21+ov/em4zeA1VEKEAiUUfIyNdGOEW8jYeXci/ePQoqC2heSOfOHYVNSUzmWV';
+    const iPad2 = 'DNDP4oXHffBDWRVw1RPQv+T7/iHqCuMS/c597TOFchDopg7uXgwO0eHYVNSUzmWV';
+    const iPad = iPadAir;
+    
+    client.login (function (response) {
+        if (!client.authenticated) {
+            return;
         }
+        client.initClient (function (res, body) {
+            
+            function cb(res, body) {
+                var i = 1;
+            }
+            
+            client.refreshWebAuth(cb);
+            //client.validate();
+            // client.stopLostMode (iPad, function(res, body) {
+            //     var i = 0;
+            // });
+            
+            client.sendMessage (iPad, "Hallo Text", true, function (res, body) {
+                var i = 0;
+            });
+            return;
+            
+            client.lostDevice (iPad, {
+                ownerNbr: "0049 2561 9130",
+                passcode: "2222",
+                text: "Hallo Display-Text"
+            }, function (res, body) {
+                var i = 0;
+            });
+            
+            // NOK
+            // client.listDevices(function(res, body) {
+            //     res = res;
+            // });
+            
+            // client.refreshClient (iPad, function (devices) {
+            //     var found = 1;
+            // });
+            // return;
+            
+            // client.stopLostMode (iPad, function(res, body) {
+            //     var i = 0;
+            // });
+            
+            // client.lostDevice (iPad, { ownerNbr: "0049 2561 913260", passcode: "2222", text: "Hallo Display-Text" }, function(res, body) {
+            //     var i = 0;
+            // });
+            
+            // client.sendMessage (iPad, "Hallo Text", true, function(res, body) {
+            //     var i = 0;
+            // });
+            
+            // client.mecard(function(res, body) {
+            //    var i = 1;
+            // });
+            
+            // client.playSound( { deviceID: iPad, subject: 'Hallo Leon' }, function(res, body) {
+            //     var i = 1;
+            // });
+        });
+        return;
+        client.refreshClient (function (err, devices) {
+            var found = 1;
+        })
     });
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function main() {
     normalizeConfig(adapter.config);
-    iCloud.apple_id = adapter.config.username;
-    iCloud.password = adapter.config.password;
+    
+    iCloud = new ICloud(adapter.config.username, adapter.config.password);
     if (adapter.config.key2Step) iCloud.password += adapter.config.key2Step;
-
+    
     adapter.getForeignObject('system.adapter.javascript.0', function(err, obj) {
-        if (!err && obj && obj.native) {
-            iCloud.latitude = obj.native.latetude;
-            iCloud.longitude = obj.native.longitude;
-            createDevices();
-        } else {
-            iCloud.latitude = 0.0;
-            iCloud.longitude = 0.0;
-            getLocationByIP(iCloud, createDevices);
-        }
+        iCloud.setOwnLocation( !err && obj ? obj.native : null, createDevices);
     });
     adapter.subscribeStates('*');
+    adapter.subscribeObjects('*');
 }
+
