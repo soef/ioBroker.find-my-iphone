@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "title": "Find my iPhone",
     "news": {
+      "0.2.5": {
+        "en": "Some changes for use with node 0.10.x and 0.12.x",
+        "de": "Einige Änderungen zur Nutzung mit node 0.10.x und 0.12.x"
+      },
       "0.2.4": {
         "en": "Various error corrections",
         "de": "Diverse Fehlerkorrekturen"
