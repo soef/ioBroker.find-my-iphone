@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "title": "Find my iPhone",
     "news": {
+      "0.2.6": {
+        "en": "Version incremented for npm",
+        "de": "Version fürnpm erhöht"
+      },
       "0.2.5": {
         "en": "Some changes for use with node 0.10.x and 0.12.x",
         "de": "Einige Änderungen zur Nutzung mit node 0.10.x und 0.12.x"
