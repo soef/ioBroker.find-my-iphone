@@ -400,8 +400,15 @@ function main() {
     iCloud = new ICloud(adapter.config.username, adapter.config.password);
     if (adapter.config.key2Step) iCloud.password += adapter.config.key2Step;
     
-    adapter.getForeignObject('system.adapter.javascript.0', function(err, obj) {
-        iCloud.setOwnLocation( !err && obj ? obj.native : null, createDevices);
+    
+    adapter.getForeignObject('system.config', function(err, obj) {
+        if (!err && obj && obj.common.latitude && obj.common.longitude) {
+            iCloud.setOwnLocation (!err && obj ? obj.common : null, createDevices);
+            return;
+        }
+        adapter.getForeignObject ('system.adapter.javascript.0', function (err, obj) {
+            iCloud.setOwnLocation (!err && obj ? obj.native : null, createDevices);
+        });
     });
     adapter.subscribeStates('*');
     adapter.subscribeObjects('*');

@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "title": "Find my iPhone",
     "news": {
+      "0.2.7": {
+        "en": "Now using longitude &  latitude from system configuration",
+        "de": "Es werden nun die koordinaten der Systemeinstellung verwendet"
+      },
       "0.2.6": {
         "en": "Version incremented for npm",
         "de": "Version fürnpm erhöht"
