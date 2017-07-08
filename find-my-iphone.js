@@ -52,7 +52,7 @@ function onStateChange(id, state) {
             break;
         case 'alert':
             if (device && device.native && device.native.id) {
-                var msg = typeof state.val == 'string' && state.val != "" ? state.val : 'ioBroker Find my iPhone Alert';
+                var msg = typeof state.val === 'string' && state.val !== "" ? state.val : 'ioBroker Find my iPhone Alert';
                 iCloud.alertDevice(device.native.id, msg, function (err) {
                 });
             }
@@ -89,6 +89,8 @@ function createOurState (device, cb) {
     dev.createNew('lost', { val: '', common: { name: 'Lost Mode', desc: 'Parameter: usertext[;phone number to call[;passcode]'} } );
     dev.createNew('refresh', { val: false, common: { name: 'Refresh this device with shouldLocate=true' } });
     dev.createNew('isLocating', { val: !!device.isLocating, common: { write: false }} );
+    dev.createNew('latitude', { val: 0.0, common: { write: false, role: 'gps' }} );
+    dev.createNew('longitude', { val: 0.0, common: { write: false, role: 'gps' }} );
     updateOurState(device, dev, cb);
 }
 

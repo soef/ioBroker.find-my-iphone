@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.2.7",
+    "version": "0.2.8",
     "title": "Find my iPhone",
     "news": {
+      "0.2.8": {
+        "en": "changed role of long/lat to gps",
+        "de": "Rolle von Längen/breitengrad zu gps geändert"
+      },
       "0.2.7": {
         "en": "Now using longitude &  latitude from system configuration",
         "de": "Es werden nun die koordinaten der Systemeinstellung verwendet"
