@@ -390,6 +390,7 @@ function decrypt(str) {
 function normalizeConfig(config) {
     config.username = decrypt(config.username);
     config.password = decrypt(config.password);
+    config.key2Step = decrypt(config.key2Step);
     if (config.locationToFixedVal !== undefined) locationToFixedVal = config.locationToFixedVal;
     //config.refreshInterval = 20000;
 }

@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.2.8",
+    "version": "0.2.9",
     "title": "Find my iPhone",
     "news": {
+      "0.2.9": {
+        "en": "fix possible error in two step authentication",
+        "de": "Möglichen Fehler in zwei Faktor Authentisierung behoben"
+      },
       "0.2.8": {
         "en": "changed role of long/lat to gps",
         "de": "Rolle von Längen/breitengrad zu gps geändert"
