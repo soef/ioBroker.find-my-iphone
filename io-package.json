@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "title": "Find my iPhone",
     "news": {
+      "0.2.10": {
+        "en": "schduled adapter restart",
+        "de": "geplanter Neustart"
+      },
       "0.2.9": {
         "en": "fix possible error in two step authentication",
         "de": "Möglichen Fehler in zwei Faktor Authentisierung behoben"
