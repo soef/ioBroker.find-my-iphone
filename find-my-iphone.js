@@ -114,7 +114,7 @@ function updateOurState(device, dev, cb) {
             var xyz = 1;
         }
         dev.set('lostMode', (!!device.lostDevice && (~~device.lostDevice.statusCode) >= 2204));
-        
+
         // var changed = dev.set('latitude', device.location.latitude);
         // changed |= dev.set('longitude', device.location.longitude);
         var changed = dev.set('latitude', device.location.latitude.toFixed(locationToFixedVal));
@@ -164,7 +164,8 @@ function updateWithTimer(device, val, cb) {
     var req = { device: device.native.id, shouldLocate: true };
     var doIt = function () {
         manUpdateDevice (req, function (appleDevice) {
-            if (cnt-- <= 0 || (bo && appleDevice.isLocating === false)) {
+            //if (cnt-- <= 0 || (bo && appleDevice.isLocating === false)) {
+            if (cnt-- <= 0 || (bo && (!appleDevice || appleDevice.isLocating === false))) {
                 delete device.refreshTimer;
                 devices.setState({ device: device.common.name, state: 'refresh', val: false });
                 return;
@@ -358,7 +359,7 @@ function createDevices (callback) {
     //     this.setdcState(d, undefined, s, val, ack);
     // };
     // devices.orig_setState = devices.setState;
-    
+
     // devices.setEx = function (id, val, ack) {
     //     this.setState(soef.ns.no(id), val, ack);
     // };
@@ -385,6 +386,17 @@ function decrypt(str) {
     }
 }
 
+function setRestartScheduler() {
+    adapter.getForeignObject('system.adapter.' + adapter.namespace, function (err, obj) {
+        if (err || !obj) return;
+        if (obj.common.restartSchedule === undefined) {
+            obj.common.restartSchedule = "0 3 * * *";
+            adapter.setForeignObject('system.adapter.' + adapter.namespace, obj);
+        }
+    })
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function normalizeConfig(config) {
@@ -399,11 +411,12 @@ function normalizeConfig(config) {
 
 function main() {
     normalizeConfig(adapter.config);
-    
+    setRestartScheduler();
+
     iCloud = new ICloud(adapter.config.username, adapter.config.password);
     if (adapter.config.key2Step) iCloud.password += adapter.config.key2Step;
-    
-    
+
+
     adapter.getForeignObject('system.config', function(err, obj) {
         if (!err && obj && obj.common.latitude && obj.common.longitude) {
             iCloud.setOwnLocation (!err && obj ? obj.common : null, createDevices);
