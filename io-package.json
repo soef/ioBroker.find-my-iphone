@@ -1,9 +1,13 @@
 {
   "common": {
     "name": "find-my-iphone",
-    "version": "0.2.10",
+    "version": "0.2.11",
     "title": "Find my iPhone",
     "news": {
+      "0.2.11": {
+        "en": "Enhance CI testing",
+        "de": "CI testing erweitert"
+      },
       "0.2.10": {
         "en": "schduled adapter restart",
         "de": "geplanter Neustart"
