@@ -1,92 +1,96 @@
 {
-  "common": {
-    "name": "find-my-iphone",
-    "version": "0.2.12",
-    "title": "Find my iPhone",
-    "news": {
-      "0.2.12": {
-        "en": "node 0.12 removed from testing",
-        "de": "node 0.12 auf testing entfernt"
-      },
-      "0.2.11": {
-        "en": "Enhance CI testing",
-        "de": "CI testing erweitert"
-      },
-      "0.2.10": {
-        "en": "schduled adapter restart",
-        "de": "geplanter Neustart"
-      },
-      "0.2.9": {
-        "en": "fix possible error in two step authentication",
-        "de": "Möglichen Fehler in zwei Faktor Authentisierung behoben"
-      },
-      "0.2.8": {
-        "en": "changed role of long/lat to gps",
-        "de": "Rolle von Längen/breitengrad zu gps geändert"
-      },
-      "0.2.7": {
-        "en": "Now using longitude &  latitude from system configuration",
-        "de": "Es werden nun die koordinaten der Systemeinstellung verwendet"
-      },
-      "0.2.6": {
-        "en": "Version incremented for npm",
-        "de": "Version fürnpm erhöht"
-      },
-      "0.2.5": {
-        "en": "Some changes for use with node 0.10.x and 0.12.x",
-        "de": "Einige Änderungen zur Nutzung mit node 0.10.x und 0.12.x"
-      },
-      "0.2.4": {
-        "en": "Various error corrections",
-        "de": "Diverse Fehlerkorrekturen"
-      },
-      "0.1.7": {
-        "en": "Workaround for Two-step verification",
-        "de": "Workaround für Zwei-Faktor-Authentisierung"
-      },
-      "0.1.6": {
-        "en": "Relogin, if sending a request fails",
-        "de": "Erneutes Login, wenn das Senden fehlschlägt"
-      },
-      "0.1.3": {
-        "en": "Function for Lost Mode added",
-        "de": "Funktion Mode Verloren hinzugefügt"
-      },
-      "0.1.0": {
-        "en": "Typo fix for text of alert message",
-        "de": "Tipfehler bezüglich Text der Alert Nachricht"
-      }
+    "common": {
+        "name": "find-my-iphone",
+        "version": "0.2.12",
+        "title": "Find my iPhone",
+        "news": {
+            "0.2.12": {
+                "en": "node 0.12 removed from testing",
+                "de": "node 0.12 auf testing entfernt"
+            },
+            "0.2.11": {
+                "en": "Enhance CI testing",
+                "de": "CI testing erweitert"
+            },
+            "0.2.10": {
+                "en": "schduled adapter restart",
+                "de": "geplanter Neustart"
+            },
+            "0.2.9": {
+                "en": "fix possible error in two step authentication",
+                "de": "Möglichen Fehler in zwei Faktor Authentisierung behoben"
+            },
+            "0.2.8": {
+                "en": "changed role of long/lat to gps",
+                "de": "Rolle von Längen/breitengrad zu gps geändert"
+            },
+            "0.2.7": {
+                "en": "Now using longitude &  latitude from system configuration",
+                "de": "Es werden nun die koordinaten der Systemeinstellung verwendet"
+            },
+            "0.2.6": {
+                "en": "Version incremented for npm",
+                "de": "Version fürnpm erhöht"
+            },
+            "0.2.5": {
+                "en": "Some changes for use with node 0.10.x and 0.12.x",
+                "de": "Einige Änderungen zur Nutzung mit node 0.10.x und 0.12.x"
+            },
+            "0.2.4": {
+                "en": "Various error corrections",
+                "de": "Diverse Fehlerkorrekturen"
+            },
+            "0.1.7": {
+                "en": "Workaround for Two-step verification",
+                "de": "Workaround für Zwei-Faktor-Authentisierung"
+            },
+            "0.1.6": {
+                "en": "Relogin, if sending a request fails",
+                "de": "Erneutes Login, wenn das Senden fehlschlägt"
+            },
+            "0.1.3": {
+                "en": "Function for Lost Mode added",
+                "de": "Funktion Mode Verloren hinzugefügt"
+            },
+            "0.1.0": {
+                "en": "Typo fix for text of alert message",
+                "de": "Tipfehler bezüglich Text der Alert Nachricht"
+            }
+        },
+        "desc": {
+            "en": "Find my Apple device (iPhone, iPad, iMac...)",
+            "de": "Find my Apple device (iPhone, iPad, iMac...)",
+            "ru": "Find my Apple device (iPhone, iPad, iMac...)"
+        },
+        "keywords": [
+            "ioBroker",
+            "Apple",
+            "iPhone",
+            "iPad",
+            "macBook",
+            "MacMini",
+            "iMac"
+        ],
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "icon": "find-my-iphone.png",
+        "extIcon": "https://raw.githubusercontent.com/soef/iobroker.find-my-iphone/master/admin/find-my-iphone.png",
+        "readme": "https://github.com/soef/iobroker.find-my-iphone/blob/master/README.md",
+        "loglevel": "info",
+        "type": "geoposition",
+        "messagebox": true,
+        "enabled": true,
+        "authors": [
+            {
+                "name": "soef",
+                "email": "soef@gmx.net"
+            }
+        ]
     },
-    "desc": {
-      "en": "Find my Apple device (iPhone, iPad, iMac...)",
-      "de": "Find my Apple device (iPhone, iPad, iMac...)",
-      "ru": "Find my Apple device (iPhone, iPad, iMac...)"
+    "native": {
+        "username": "",
+        "password": ""
     },
-    "keywords": [
-      "ioBroker",
-      "Apple",
-      "iPhone",
-      "iPad",
-      "macBook",
-      "MacMini",
-      "iMac"
-    ],
-    "platform": "Javascript/Node.js",
-    "mode": "daemon",
-    "icon": "find-my-iphone.png",
-    "extIcon": "https://raw.githubusercontent.com/soef/iobroker.find-my-iphone/master/admin/find-my-iphone.png",
-    "readme": "https://github.com/soef/iobroker.find-my-iphone/blob/master/README.md",
-    "loglevel": "info",
-    "type": "hardware",
-    "messagebox": true,
-    "enabled": true
-  },
-  "native": {
-    "username": "",
-    "password": ""
-  },
-  "instanceObjects": [
-  ],
-  "objects": [
-  ]
+    "instanceObjects": [],
+    "objects": []
 }
