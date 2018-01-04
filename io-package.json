@@ -1,9 +1,13 @@
 {
     "common": {
         "name": "find-my-iphone",
-        "version": "0.2.14",
+        "version": "0.2.15",
         "title": "Find my iPhone",
         "news": {
+            "0.2.15": {
+                "en": "typo fixed (cernst1980)",
+                "de": "Tippfehler korrigirt (cernst1980)"
+            },
             "0.2.14": {
                 "en": "update basic package-file testing (Apollon77)",
                 "de": "Erweiterung der Tests (Apollon77)"
