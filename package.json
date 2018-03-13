@@ -1,6 +1,6 @@
 {
   "name": "iobroker.find-my-iphone",
-  "version": "0.2.15",
+  "version": "0.2.17",
   "description": "Find my iPhone",
   "author": {
     "name": "soef",
@@ -36,7 +36,7 @@
   "dependencies": {
     "os-tmpdir": "^1.0.2",
     "request": "^2.57.0",
-    "soef": "^0.3.0",
+    "soef": "^0.4.0",
     "tough-cookie-filestore": "0.0.1",
     "uuid": "^3.0.1"
   },

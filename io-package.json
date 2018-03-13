@@ -1,9 +1,13 @@
 {
     "common": {
         "name": "find-my-iphone",
-        "version": "0.2.15",
+        "version": "0.2.17",
         "title": "Find my iPhone",
         "news": {
+            "0.2.17": {
+                "en": "required soef version incr. to 0.4.0",
+                "de": "erforderliche soef Version auf 0.4.0 erhöht"
+            },
             "0.2.15": {
                 "en": "typo fixed (cernst1980)",
                 "de": "Tippfehler korrigirt (cernst1980)"
