@@ -83,6 +83,7 @@
             "MacMini",
             "iMac"
         ],
+        "license": "MIT",
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "find-my-iphone.png",
